@@ -15,6 +15,10 @@ interface AuthState {
   fetchMe: () => Promise<void>
 }
 
+function normalizeUser(u: User): User {
+  return { ...u, name: u.full_name || u.email }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -23,15 +27,24 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       setUser: (user) => {
-        set({ user, isAuthenticated: !!user })
+        set({ user: user ? normalizeUser(user) : null, isAuthenticated: !!user })
       },
 
       login: async (email, password) => {
         set({ isLoading: true })
         try {
+          // Backend returns { access_token, refresh_token, token_type, user }
           const response = await authApi.login({ email, password })
-          setTokens(response.tokens)
-          set({ user: response.user, isAuthenticated: true, isLoading: false })
+          setTokens({
+            access_token: response.access_token,
+            refresh_token: response.refresh_token,
+            token_type: response.token_type,
+          })
+          set({
+            user: normalizeUser(response.user),
+            isAuthenticated: true,
+            isLoading: false,
+          })
         } catch (error) {
           set({ isLoading: false })
           throw error
@@ -53,7 +66,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const user = await authApi.me()
-          set({ user, isAuthenticated: true, isLoading: false })
+          set({ user: normalizeUser(user), isAuthenticated: true, isLoading: false })
         } catch {
           clearTokens()
           set({ user: null, isAuthenticated: false, isLoading: false })

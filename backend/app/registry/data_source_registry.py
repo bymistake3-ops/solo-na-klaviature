@@ -1,0 +1,153 @@
+"""Default data source definitions seeded on startup."""
+
+NEW_USERS_SCHEMA = {
+    "columns": [
+        {"name": "period_start", "data_type": "date", "required": True},
+        {"name": "period_end", "data_type": "date", "required": True},
+        {"name": "period_number", "data_type": "integer", "required": False},
+        {"name": "new_users", "data_type": "integer", "required": True},
+    ]
+}
+
+NEW_USERS_COLUMN_MAPPING = {
+    "period_start": "period_start",
+    "period_end": "period_end",
+    "period_number": "period_number",
+    "new_users": "new_users",
+}
+
+PAYMENTS_SCHEMA = {
+    "columns": [
+        {"name": "period_start", "data_type": "date", "required": True},
+        {"name": "period_end", "data_type": "date", "required": True},
+        {"name": "period_number", "data_type": "integer", "required": False},
+        {"name": "total_payments_count", "data_type": "integer", "required": True},
+        {"name": "payments_afterjoin_count", "data_type": "integer", "required": False},
+        {"name": "payments_byguest_count", "data_type": "integer", "required": False},
+        {"name": "discounts_count", "data_type": "integer", "required": False},
+        {"name": "total_amount_gross", "data_type": "float", "required": True},
+        {"name": "total_amount_net", "data_type": "float", "required": True},
+        {"name": "avg_amount_gross", "data_type": "float", "required": False},
+        {"name": "avg_amount_net", "data_type": "float", "required": False},
+        {"name": "median_amount_gross", "data_type": "float", "required": False},
+        {"name": "median_amount_net", "data_type": "float", "required": False},
+    ]
+}
+
+PAYMENTS_COLUMN_MAPPING = {
+    "period_start": "period_start",
+    "period_end": "period_end",
+    "period_number": "period_number",
+    "total_payments_count": "total_payments_count",
+    "payments_afterjoin_count": "payments_afterjoin_count",
+    "payments_byguest_count": "payments_byguest_count",
+    "discounts_count": "discounts_count",
+    "total_amount_gross": "total_amount_gross",
+    "total_amount_net": "total_amount_net",
+    "avg_amount_gross": "avg_amount_gross",
+    "avg_amount_net": "avg_amount_net",
+    "median_amount_gross": "median_amount_gross",
+    "median_amount_net": "median_amount_net",
+}
+
+DEFAULT_DATA_SOURCES = [
+    {
+        "name": "Новые пользователи (дни)",
+        "slug": "new_users_daily",
+        "description": "Ежедневная статистика новых пользователей",
+        "source_type": "csv",
+        "schema": NEW_USERS_SCHEMA,
+        "column_mapping": NEW_USERS_COLUMN_MAPPING,
+        "granularity": "day",
+        "category": "users",
+        "is_active": True,
+    },
+    {
+        "name": "Новые платежи (дни)",
+        "slug": "new_payments_daily",
+        "description": "Ежедневная статистика новых платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "day",
+        "category": "payments",
+        "is_active": True,
+    },
+    {
+        "name": "Повторные платежи (дни)",
+        "slug": "repeat_payments_daily",
+        "description": "Ежедневная статистика повторных платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "day",
+        "category": "payments",
+        "is_active": True,
+    },
+    {
+        "name": "Новые пользователи (недели)",
+        "slug": "new_users_weekly",
+        "description": "Недельная статистика новых пользователей",
+        "source_type": "csv",
+        "schema": NEW_USERS_SCHEMA,
+        "column_mapping": NEW_USERS_COLUMN_MAPPING,
+        "granularity": "week",
+        "category": "users",
+        "is_active": True,
+    },
+    {
+        "name": "Новые платежи (недели)",
+        "slug": "new_payments_weekly",
+        "description": "Недельная статистика новых платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "week",
+        "category": "payments",
+        "is_active": True,
+    },
+    {
+        "name": "Повторные платежи (недели)",
+        "slug": "repeat_payments_weekly",
+        "description": "Недельная статистика повторных платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "week",
+        "category": "payments",
+        "is_active": True,
+    },
+    {
+        "name": "Новые пользователи (месяцы)",
+        "slug": "new_users_monthly",
+        "description": "Месячная статистика новых пользователей",
+        "source_type": "csv",
+        "schema": NEW_USERS_SCHEMA,
+        "column_mapping": NEW_USERS_COLUMN_MAPPING,
+        "granularity": "month",
+        "category": "users",
+        "is_active": True,
+    },
+    {
+        "name": "Новые платежи (месяцы)",
+        "slug": "new_payments_monthly",
+        "description": "Месячная статистика новых платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "month",
+        "category": "payments",
+        "is_active": True,
+    },
+    {
+        "name": "Повторные платежи (месяцы)",
+        "slug": "repeat_payments_monthly",
+        "description": "Месячная статистика повторных платежей",
+        "source_type": "csv",
+        "schema": PAYMENTS_SCHEMA,
+        "column_mapping": PAYMENTS_COLUMN_MAPPING,
+        "granularity": "month",
+        "category": "payments",
+        "is_active": True,
+    },
+]
