@@ -140,6 +140,15 @@ async def exercise(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 
+async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = update.effective_chat.id
+    await update.message.reply_text(
+        f"Ваш Telegram chat\\_id:\n\n`{chat_id}`\n\n"
+        "Скопируйте это число и добавьте в файл `subscribers.txt` в репозитории на GitHub.",
+        parse_mode="Markdown",
+    )
+
+
 async def send_daily_exercise(app: Application) -> None:
     ex = get_todays_exercise()
     if not ex:
@@ -174,6 +183,7 @@ def main() -> None:
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stop", stop))
     app.add_handler(CommandHandler("exercise", exercise))
+    app.add_handler(CommandHandler("myid", myid))
 
     scheduler = AsyncIOScheduler(timezone=MOSCOW_TZ)
     scheduler.add_job(
