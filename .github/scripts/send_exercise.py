@@ -38,13 +38,12 @@ def get_target_date() -> str:
     return datetime.now(MOSCOW_TZ).strftime("%d.%m.%Y")
 
 
-def send_message(chat_id: str, text: str) -> bool:
+def send_message(chat_id: str, text: str, parse_mode: str | None = None) -> bool:
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    resp = requests.post(
-        url,
-        json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
-        timeout=10,
-    )
+    payload: dict = {"chat_id": chat_id, "text": text}
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
+    resp = requests.post(url, json=payload, timeout=10)
     return resp.status_code == 200
 
 
@@ -64,8 +63,17 @@ def main() -> None:
         print(f"На {target_date} упражнений нет — ничего не отправляем.")
         sys.exit(0)
 
-    day_exercises = day_entry["exercises"]
-    print(f"Найдено упражнений: {len(day_exercises)}")
+    # Поддержка двух форматов:
+    # Новый:  {"date": "...", "text": "готовый текст сообщения"}
+    # Старый: {"date": "...", "exercises": ["текст1", "текст2"]}
+    if "text" in day_entry:
+        messages_to_send = [day_entry["text"]]
+        use_header = False
+    else:
+        messages_to_send = day_entry["exercises"]
+        use_header = True
+
+    print(f"Найдено упражнений: {len(messages_to_send)}")
 
     subscribers = load_subscribers()
     if not subscribers:
@@ -78,15 +86,17 @@ def main() -> None:
     fail_count = 0
 
     for chat_id in subscribers:
-        for idx, exercise_text in enumerate(day_exercises, start=1):
-            if len(day_exercises) == 1:
-                header = f"🧠 *Упражнение на {target_date}*"
+        for idx, exercise_text in enumerate(messages_to_send, start=1):
+            if use_header:
+                if len(messages_to_send) == 1:
+                    header = f"🧠 *Упражнение на {target_date}*"
+                else:
+                    header = f"🧠 *Упражнение {idx} из {len(messages_to_send)} на {target_date}*"
+                message = f"{header}\n\n{exercise_text}"
             else:
-                header = f"🧠 *Упражнение {idx} из {len(day_exercises)} на {target_date}*"
+                message = exercise_text
 
-            message = f"{header}\n\n{exercise_text}"
-
-            success = send_message(chat_id, message)
+            success = send_message(chat_id, message, parse_mode="Markdown" if use_header else None)
             if success:
                 ok_count += 1
                 print(f"  ✓ → {chat_id} (упражнение {idx})")
