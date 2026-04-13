@@ -1,0 +1,36 @@
+name: Отправка ежедневного упражнения
+
+on:
+  # Каждый день в 09:00 по Москве (= 06:00 UTC)
+  schedule:
+    - cron: '0 6 * * *'
+
+  # Ручной запуск: вкладка Actions → выбрать этот workflow → Run workflow
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: 'Дата для отправки (ДД.ММ.ГГГГ). Пусто = сегодня'
+        required: false
+        default: ''
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install requests
+
+      - name: Отправить упражнение
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DATE_OVERRIDE: ${{ github.event.inputs.date_override }}
+        run: python .github/scripts/send_exercise.py

@@ -51,6 +51,20 @@ services:
     depends_on:
       - backend
 
+  telegram_bot:
+    build:
+      context: ./telegram_bot
+      dockerfile: Dockerfile
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-8598697652:AAElNoRcrN8EOayZDjjSKgJU7HgITq8ts8M}
+      - SUBSCRIBERS_FILE=/data/subscribers.json
+      - SEND_HOUR=${SEND_HOUR:-9}
+      - SEND_MINUTE=${SEND_MINUTE:-0}
+    volumes:
+      - bot_data:/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   upload_data:
+  bot_data:
