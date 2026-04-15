@@ -13,6 +13,7 @@
 import json
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -21,6 +22,7 @@ import requests
 
 BOT_TOKEN      = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 MOSCOW_TZ      = ZoneInfo("Europe/Moscow")
+MAX_MESSAGE_AGE_SEC = 1800   # игнорировать сообщения старше 30 минут
 OFFSET_FILE    = Path("telegram_offset.txt")
 SUBSCRIBERS_FILE = Path("subscribers.txt")
 EXERCISES_FILE = Path("exercises.json")
@@ -144,6 +146,12 @@ def main() -> None:
         chat_id = chat.get("id")
 
         if not chat_id or not text or not text.startswith("/"):
+            continue
+
+        # Игнорируем сообщения старше 30 минут (защита от повторной обработки при сбросе offset)
+        msg_date = message.get("date", 0)
+        if time.time() - msg_date > MAX_MESSAGE_AGE_SEC:
+            print(f"  Пропуск старого сообщения от {chat_id} (возраст {int(time.time()-msg_date)}с)")
             continue
 
         # Убираем @имя_бота из команды (например /start@mybot → /start)
