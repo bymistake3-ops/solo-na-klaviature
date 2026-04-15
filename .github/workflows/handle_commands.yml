@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Получить репозиторий
         uses: actions/checkout@v4
+        with:
+          ref: main   # всегда работаем с main, даже при ручном запуске с другой ветки
 
       - name: Установить Python
         uses: actions/setup-python@v5
@@ -39,6 +41,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git add subscribers.txt telegram_offset.txt
           git diff --cached --quiet && echo "Изменений нет" && exit 0
-          git pull --rebase origin main
           git commit -m "bot: обновление подписчиков"
-          git push
+          git push origin main
