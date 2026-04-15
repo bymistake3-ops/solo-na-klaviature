@@ -1,6 +1,5 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "pip install -r telegram_bot/requirements.txt"
 
 [deploy]
 startCommand = "python telegram_bot/bot.py"

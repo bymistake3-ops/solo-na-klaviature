@@ -1,0 +1,44 @@
+name: Обработка команд бота
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # каждые 10 минут
+  workflow_dispatch:           # ручной запуск для теста
+
+# Не запускать одновременно — иначе конфликт при коммите
+concurrency:
+  group: bot-commands
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # нужно для коммита изменений в репозиторий
+
+    steps:
+      - name: Получить репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install requests
+
+      - name: Обработать команды
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python .github/scripts/handle_commands.py
+
+      - name: Сохранить изменения в репозиторий
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add subscribers.txt telegram_offset.txt
+          git diff --cached --quiet && echo "Изменений нет" && exit 0
+          git pull --rebase origin main
+          git commit -m "bot: обновление подписчиков"
+          git push
