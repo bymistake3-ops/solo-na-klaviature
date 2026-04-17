@@ -12,6 +12,7 @@
 
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -19,6 +20,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import requests
+
+
+def clean_text(text: str) -> str:
+    """Убирает нумерацию вида '| Упражнение #005' из текста."""
+    return re.sub(r"\s*\|\s*Упражнение\s*#\d+", "", text).strip()
 
 BOT_TOKEN      = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 MOSCOW_TZ      = ZoneInfo("Europe/Moscow")
@@ -100,9 +106,9 @@ def get_todays_exercise() -> str | None:
     if not entry:
         return None
     if "text" in entry:
-        return entry["text"]
+        return clean_text(entry["text"])
     texts = entry.get("exercises", [])
-    return "\n\n―――――――――\n\n".join(texts) if texts else None
+    return "\n\n―――――――――\n\n".join(clean_text(t) for t in texts) if texts else None
 
 
 # ── Главная логика ────────────────────────────────────────────────────────────

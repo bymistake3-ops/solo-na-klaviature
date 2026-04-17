@@ -5,6 +5,7 @@
 
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -15,6 +16,11 @@ MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 DATE_OVERRIDE = os.environ.get("DATE_OVERRIDE", "").strip()
+
+
+def clean_text(text: str) -> str:
+    """Убирает нумерацию вида '| Упражнение #005' из текста."""
+    return re.sub(r"\s*\|\s*Упражнение\s*#\d+", "", text).strip()
 
 
 def load_exercises(path: str = "exercises.json") -> list[dict]:
@@ -67,10 +73,10 @@ def main() -> None:
     # Новый:  {"date": "...", "text": "готовый текст сообщения"}
     # Старый: {"date": "...", "exercises": ["текст1", "текст2"]}
     if "text" in day_entry:
-        messages_to_send = [day_entry["text"]]
+        messages_to_send = [clean_text(day_entry["text"])]
         use_header = False
     else:
-        messages_to_send = day_entry["exercises"]
+        messages_to_send = [clean_text(t) for t in day_entry["exercises"]]
         use_header = True
 
     print(f"Найдено упражнений: {len(messages_to_send)}")
