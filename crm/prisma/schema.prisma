@@ -1,0 +1,109 @@
+// Prisma schema for the EdTech CRM
+// SQLite is used for MVP simplicity. To switch to PostgreSQL, change the
+// datasource provider to "postgresql" and update DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("member") // "admin" | "member"
+  createdAt    DateTime @default(now())
+
+  b2cClients B2CClient[]
+  b2bAccounts B2BAccount[]
+  tasks      Task[]
+  notes      Note[]
+}
+
+model B2CClient {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?
+  phone         String?
+  dealStatus    String    @default("new") // new | contacted | negotiation | paid | closed
+  revenue       Int       @default(0) // in the smallest currency unit (e.g., rubles)
+  managerId     String?
+  manager       User?     @relation(fields: [managerId], references: [id], onDelete: SetNull)
+  nextContactAt DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  noteItems Note[]
+  tasks     Task[]
+
+  @@index([dealStatus])
+  @@index([managerId])
+}
+
+model B2BAccount {
+  id                       String    @id @default(cuid())
+  companyName              String
+  legalEntity              String?
+  contactPerson            String?
+  contacts                 String? // freeform contact info (email / phone / tg)
+  employeeCount            Int?
+  decisionMaker            String?
+  recommendationsCollected Boolean   @default(false)
+  offeredOfflineSchool     Boolean   @default(false)
+  accountStatus            String    @default("active") // active | paused | needs_contact | expansion | churn_risk
+  managerId                String?
+  manager                  User?     @relation(fields: [managerId], references: [id], onDelete: SetNull)
+  lastContactAt            DateTime?
+  nextContactAt            DateTime?
+  notes                    String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  noteItems Note[]
+  tasks     Task[]
+
+  @@index([accountStatus])
+  @@index([managerId])
+}
+
+model Task {
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  dueDate      DateTime?
+  status       String    @default("open") // open | done
+  priority     String    @default("normal") // low | normal | high
+  assignedToId String?
+  assignedTo   User?     @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  relatedType  String? // "b2c" | "b2b"
+  b2cId        String?
+  b2c          B2CClient? @relation(fields: [b2cId], references: [id], onDelete: Cascade)
+  b2bId        String?
+  b2b          B2BAccount? @relation(fields: [b2bId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Note {
+  id         String    @id @default(cuid())
+  body       String
+  authorId   String?
+  author     User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  b2cId      String?
+  b2c        B2CClient? @relation(fields: [b2cId], references: [id], onDelete: Cascade)
+  b2bId      String?
+  b2b        B2BAccount? @relation(fields: [b2bId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+
+  @@index([b2cId])
+  @@index([b2bId])
+}

@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.env
+.env.local
+prisma/dev.db
+prisma/dev.db-journal
+*.log
+.DS_Store
+
+# Override root .gitignore which excludes Python's lib/ directory —
+# we need src/lib/ (TypeScript modules) to be tracked.
+!src/lib/
+!src/lib/**
