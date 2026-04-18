@@ -1,13 +1,13 @@
 // Prisma schema for the EdTech CRM
-// SQLite is used for MVP simplicity. To switch to PostgreSQL, change the
-// datasource provider to "postgresql" and update DATABASE_URL.
+// Uses PostgreSQL. For local development you can use the same free Neon
+// database as production (just pass a different schema in DATABASE_URL).
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
